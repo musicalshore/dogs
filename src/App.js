@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useReducer } from "react";
+import Dogs from "./components/Dogs";
+import Filter from "./components/Filter";
+import { fetchBreeds } from "./components/api";
+import { reducer } from "./components/reducer";
+import { getFilteredBreeds } from "./components/selectors";
 
-function App() {
+const initialState = {
+  breeds: [],
+  searchText: ""
+}
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const breeds = getFilteredBreeds(state)
+  useEffect(() => {
+    fetchBreeds().then(breeds => {
+      dispatch({ type: "UPDATE", value: breeds})
+    });
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Filter searchText={state.searchText}
+        onFilter={e => {
+          dispatch({
+            type: "FILTER_BREEDS", value: e.target.value
+          })
+        }}
+      />
+      <Dogs breeds={breeds} />
     </div>
   );
 }
-
-export default App;
